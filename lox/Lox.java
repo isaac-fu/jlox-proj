@@ -1,4 +1,3 @@
-package com.craftinginterpreters.lox;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
+
+
 public class Lox {
     private static boolean hadError = false;
 
@@ -45,8 +46,7 @@ public class Lox {
         System.err.println(
         "[line " + line + "] Error" + where + ": " + message);
         hadError = true;
-    }
- 
+    } 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
             System.out.println("Usage: jlox [script]");
