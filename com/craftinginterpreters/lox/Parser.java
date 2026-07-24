@@ -3,7 +3,7 @@ import java.util.List;
 import static lox.TokenType.*;
 class Parser {
 
-    private static class PraseError extends RuntimeException {}
+    private static class ParseError extends RuntimeException {}
 
     private final List<Token> tokens;
     private int current = 0;
@@ -145,6 +145,14 @@ class Parser {
                     return;
             }
             advance();
+        }
+    }
+
+    Expr parse() {
+        try {
+            return expression();
+        } catch (ParseError error) {
+            return null;
         }
     }
 }
