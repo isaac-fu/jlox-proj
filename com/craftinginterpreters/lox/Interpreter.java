@@ -1,4 +1,5 @@
 package lox;
+import java.util.List;
 
 class RuntimeError extends RuntimeException {
     final Token token;
@@ -8,7 +9,9 @@ class RuntimeError extends RuntimeException {
     }
 }
 
-class Interpreter implements Expr.Visitor<Object>{
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
+
+    private Environment environment = new Environment();
 
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
@@ -33,6 +36,11 @@ class Interpreter implements Expr.Visitor<Object>{
 
         // Unreachable.
         return null;
+    }
+
+    @Override
+    public Object visitVariableExpr(Expr.Variable expr) {
+        return environment.get(expr.name);
     }
 
     private void checkNumberOperand(Token operator, Object operand) {
@@ -105,13 +113,48 @@ class Interpreter implements Expr.Visitor<Object>{
         return expr.accept(this);
     }
 
-    void interpret(Expr expression) {
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Void visitVarStmt(Stmt.Var stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+        environment.define(stmt.name.lexeme, value);
+        return null;
+    }
+
+    @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        environment.assign(expr.name, value);
+        return value;
+    }
+
+    void interpret(List<Stmt> statements) {
         try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (RuntimeError error) {
             Lox.runtimeError(error);
         }
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     private String stringify(Object object) {
