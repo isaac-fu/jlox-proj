@@ -1,5 +1,6 @@
 package lox;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import static lox.TokenType.*;
 class Parser {
@@ -159,14 +160,6 @@ class Parser {
         return new ParseError();
     }
 
-    static void error(Token token, String message) {
-        if (token.type == TokenType.EOF) {
-        report(token.line, " at end", message);
-        } else {
-        report(token.line, " at '" + token.lexeme + "'", message);
-        }
-    }
-
     private void synchronize() {
         advance();
         while (!isAtEnd()) {
@@ -205,11 +198,49 @@ class Parser {
     }
 
     private Stmt statement() {
+        if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
         return expressionStatement();
+    }
+
+    private Stmt forStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'for'.");
+        // first part of the for loop is either a variable declaration, an expression statement, or nothing
+        Stmt initializer;
+        if (match(SEMICOLON)) {
+            initializer = null;
+        } else if (match(VAR)) {
+            initializer = varDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
+        // second part of the for loop is the condition, which is an expression or nothing
+        Expr condition = null;
+        if (!check(SEMICOLON)) {
+            condition = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after loop condition.");
+        // third part of the for loop is the increment, which is an expression or nothing
+        Expr increment = null;
+        if (!check(RIGHT_PAREN)) {
+            increment = expression();
+        }
+        consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+        Stmt body = statement();
+        if (increment != null) {
+            body = new Stmt.Block(Arrays.asList(
+                body,
+                new Stmt.Expression(increment)));
+        }
+        if (condition == null) condition = new Expr.Literal(true);
+        body = new Stmt.While(condition, body);
+        if (initializer != null) {
+            body = new Stmt.Block(Arrays.asList(initializer, body));
+        }
+        return body;
     }
 
     private Stmt ifStatement() {

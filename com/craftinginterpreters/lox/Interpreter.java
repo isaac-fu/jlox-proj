@@ -31,7 +31,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     }
 
     @Override
-    public Object visitGroupExpr(Expr.Grouping expr) {
+    public Object visitGroupingExpr(Expr.Grouping expr) {
         return evaluate(expr.expression);
     }
 
