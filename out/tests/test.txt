@@ -1,0 +1,4 @@
+var a = 100;
+var b = a * a;
+var c = b * a;
+print (a + b + c);

@@ -1,0 +1,20 @@
+// test
+
+class Alina {
+
+    init (emotion) {
+        this.emotion = emotion;
+    }
+
+    goodnight() {
+        print "Goodnight sweet dreams";
+    }
+
+    mood() {
+        print this.emotion;
+    }
+}
+
+var a = Alina("Tired");
+a.goodnight();
+a.mood();
