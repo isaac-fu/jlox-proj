@@ -1,4 +1,8 @@
-var a = 100;
-var b = a * a;
-var c = b * a;
-print (a + b + c);
+class Solution {
+    twoSum () {
+        // does nothing right now... in progress
+        print "stuff";
+    }
+}
+var s = Solution();
+s.twoSum();
