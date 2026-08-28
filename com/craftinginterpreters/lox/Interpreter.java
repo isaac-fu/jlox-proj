@@ -199,6 +199,49 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         throw new RuntimeError(expr.name, "Only instances have properties.");
     }
 
+    @Override
+    public Object visitIndexExpr(Expr.Index expr) {
+        Object object = evaluate(expr.object);
+        Object key = evaluate(expr.key);
+
+        if (object instanceof LoxIndexable) {
+            return ((LoxIndexable)object).get(expr.bracket, key);
+        }
+        throw new RuntimeError(expr.bracket, "Only indexable objects can be indexed.");
+    }
+
+    @Override
+    public Object visitIndexSetExpr(Expr.IndexSet expr) {
+        Object object = evaluate(expr.object);
+        Object key = evaluate(expr.key);
+        Object value = evaluate(expr.value);
+
+        if (object instanceof LoxIndexable) {
+            return ((LoxIndexable)object).set(expr.bracket, key, value);
+        }
+        throw new RuntimeError(expr.bracket, "Only indexable objects can be indexed.");
+    }
+
+    @Override
+    public Object visitListLiteralExpr(Expr.ListLiteral expr) {
+        List<Object> elements = new ArrayList<>();
+        for (Expr element : expr.elements) {
+            elements.add(evaluate(element));
+        }
+        return new LoxList(elements);
+    }
+
+    @Override
+    public Object visitMapLiteralExpr(Expr.MapLiteral expr) {
+        List<Object> keys = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
+        for (int i = 0; i < expr.keys.size(); i++) {
+            keys.add(evaluate(expr.keys.get(i)));
+            values.add(evaluate(expr.values.get(i)));
+        }
+        return new LoxMap(keys, values);
+    }
+
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
         throw new RuntimeError(operator, "Operands must be numbers.");

@@ -222,6 +222,40 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
 
+    @Override
+    public Void visitIndexExpr(Expr.Index expr) {
+        resolve(expr.object);
+        resolve(expr.key);
+        return null;
+    }
+    
+    @Override
+    public Void visitIndexSetExpr(Expr.IndexSet expr) {
+        resolve(expr.object);
+        resolve(expr.key);
+        resolve(expr.value);
+        return null;
+    }
+
+    @Override
+    public Void visitListLiteralExpr(Expr.ListLiteral expr) {
+        for (Expr element : expr.elements) {
+            resolve(element);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitMapLiteralExpr(Expr.MapLiteral expr) {
+        for (Expr key : expr.keys) {
+            resolve(key);
+        }
+        for (Expr value : expr.values) {
+            resolve(value);
+        }
+        return null;
+    }
+
     void resolve(List<Stmt> statements) {
         for (Stmt statement : statements) {
             resolve(statement);

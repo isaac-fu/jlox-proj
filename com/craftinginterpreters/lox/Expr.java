@@ -16,6 +16,10 @@ abstract class Expr {
  R visitLogicalExpr(Logical expr);
  R visitUnaryExpr(Unary expr);
  R visitVariableExpr(Variable expr);
+ R visitListLiteralExpr(ListLiteral expr);
+ R visitMapLiteralExpr(MapLiteral expr);
+ R visitIndexExpr(Index expr);
+ R visitIndexSetExpr(IndexSet expr);
  }
   static class Assign extends Expr {
     Assign(Token name, Expr value) {
@@ -184,6 +188,66 @@ abstract class Expr {
  }
 
     final Token name;
+  }
+  static class ListLiteral extends Expr {
+    ListLiteral(List<Expr> elements) {
+      this.elements = elements;
+    }
+
+ @Override
+ <R> R accept(Visitor<R> visitor) {
+ return visitor.visitListLiteralExpr(this);
+ }
+
+    final List<Expr> elements;
+  }
+  static class MapLiteral extends Expr {
+    MapLiteral(List<Expr> keys, List<Expr> values) {
+      this.keys = keys;
+      this.values = values;
+    }
+
+ @Override
+ <R> R accept(Visitor<R> visitor) {
+ return visitor.visitMapLiteralExpr(this);
+ }
+
+    final List<Expr> keys;
+    final List<Expr> values;
+  }
+  static class Index extends Expr {
+    Index(Expr object, Token bracket, Expr key) {
+      this.object = object;
+      this.bracket = bracket;
+      this.key = key;
+    }
+
+ @Override
+ <R> R accept(Visitor<R> visitor) {
+ return visitor.visitIndexExpr(this);
+ }
+
+    final Expr object;
+    final Token bracket;
+    final Expr key;
+  }
+  static class IndexSet extends Expr {
+    IndexSet(Expr object, Token bracket, Expr key, Expr value) {
+      this.object = object;
+      this.bracket = bracket;
+      this.key = key;
+      this.value = value;
+    }
+
+ @Override
+ <R> R accept(Visitor<R> visitor) {
+ return visitor.visitIndexSetExpr(this);
+ }
+
+    final Expr object;
+    final Token bracket;
+    final Expr key;
+    final Expr value;
   }
 
  abstract <R> R accept(Visitor<R> visitor);

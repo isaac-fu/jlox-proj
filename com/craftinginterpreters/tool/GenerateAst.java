@@ -22,7 +22,11 @@ public class GenerateAst {
             "Literal : Object value",
             "Logical : Expr left, Token operator, Expr right",
             "Unary : Token operator, Expr right",
-            "Variable : Token name"
+            "Variable : Token name",
+            "ListLiteral : List<Expr> elements",
+            "MapLiteral : List<Expr> keys, List<Expr> values",
+            "Index : Expr object, Token bracket, Expr key",
+            "IndexSet : Expr object, Token bracket, Expr key, Expr value"
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(

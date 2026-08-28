@@ -15,6 +15,6 @@ class Alina {
     }
 }
 
-var a = Alina("Tired");
+var a = Alina("Happy");
 a.goodnight();
 a.mood();

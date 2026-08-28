@@ -25,6 +25,9 @@ class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable)expr).name;
                 return new Expr.Assign(name, value);
+            } else if (expr instanceof Expr.Index) {
+                Expr.Index index = (Expr.Index)expr;
+                return new Expr.IndexSet(index.object, index.bracket, index.key, value);
             } else if (expr instanceof Expr.Get) {
                 Expr.Get get = (Expr.Get)expr;
                 return new Expr.Set(get.object, get.name, value);
@@ -134,6 +137,11 @@ class Parser {
             } else if (match(DOT)) {
                 Token name = consume(IDENTIFIER, "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
+            } else if (match(LEFT_BRACKET)) {
+                Token bracket = previous();
+                Expr key = expression();
+                consume(RIGHT_BRACKET, "Expect ']' after index.");
+                expr = new Expr.Index(expr, bracket, key);
             } else {
                 break;
             }
@@ -148,6 +156,31 @@ class Parser {
             return new Expr.Unary(operator, right);
         }
         return call();
+    }
+
+    private Expr listLiteral() {
+        List<Expr> elements = new ArrayList<>();
+        if (!check(RIGHT_BRACKET)) {
+            do {
+                elements.add(expression());
+            } while (match(COMMA));
+        }
+        consume(RIGHT_BRACKET, "Expect ']' after list literal.");
+        return new Expr.ListLiteral(elements);
+    }
+
+    private Expr mapLiteral() {
+        List<Expr> keys = new ArrayList<>();
+        List<Expr> values = new ArrayList<>();
+        if (!check(RIGHT_BRACE)) {
+            do {
+                keys.add(expression());
+                consume(COLON, "Expect ':' after key in map literal.");
+                values.add(expression());
+            } while (match(COMMA));
+        }
+        consume(RIGHT_BRACE, "Expect '}' after map literal.");
+        return new Expr.MapLiteral(keys, values);
     }
 
     private Expr finishCall(Expr callee) {
@@ -177,6 +210,8 @@ class Parser {
         }
         if (match(THIS)) return new Expr.This(previous());
         if (match(IDENTIFIER)) return new Expr.Variable(previous());
+        if (match(LEFT_BRACKET)) return listLiteral();
+        if (match(LEFT_BRACE)) return mapLiteral();
         if (match(LEFT_PAREN)) {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
