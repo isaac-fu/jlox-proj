@@ -1,6 +1,6 @@
 # jlox Interpreter
 
-A tree-walk interpreter for the Lox programming language, implemented in Java. This project follows the architecture introduced in *Crafting Interpreters* and implements the complete object-oriented language, including lexical scoping, closures, classes, inheritance, `this`, and `super`.
+A tree-walk interpreter for the Lox programming language, implemented in Java. This project follows the architecture introduced in *Crafting Interpreters* and extends the language with mutable list and map collections. It implements lexical scoping, closures, classes, inheritance, `this`, `super`, collection literals, and indexed access.
 
 ## Features
 
@@ -9,6 +9,8 @@ A tree-walk interpreter for the Lox programming language, implemented in Java. T
 - Tree-walk interpreter using the Visitor pattern
 - Static resolution of local variables and lexical scope
 - Numbers, strings, booleans, and `nil`
+- Mutable list and map values
+- Collection literals, indexed access, and indexed assignment
 - Arithmetic, comparison, equality, and logical operators
 - Variables, assignment, and block scope
 - `if`/`else`, `while`, and `for` control flow
@@ -48,6 +50,9 @@ All Java source files belong to the `lox` package.
 | `LoxFunction.java` | Implements functions, closures, methods, and initializers |
 | `LoxClass.java` | Represents classes and inheritance |
 | `LoxInstance.java` | Stores instance fields and binds methods |
+| `LoxIndexable.java` | Common interface for values that support indexed access and assignment |
+| `LoxList.java` | Implements mutable, numerically indexed list values |
+| `LoxMap.java` | Implements mutable key-value map values |
 | `Token.java`, `TokenType.java` | Token representation and token types |
 | `Return.java` | Internal control-flow mechanism for function returns |
 
@@ -155,12 +160,48 @@ print clock();
 
 `clock()` returns the current Unix time in seconds as a number.
 
+### Lists
+
+Lists use square brackets and may contain any Lox value. Elements can be read or replaced through zero-based indexing.
+
+```lox
+var languages = ["Java", "Lox", "Go"];
+
+print languages[0]; // Java
+languages[1] = "Python";
+print languages[1]; // Python
+```
+
+Lists may also be nested, and indexing can be chained:
+
+```lox
+var grid = [[1, 2], [3, 4]];
+print grid[1][0]; // 3
+```
+
+### Maps
+
+Maps use braces with `key: value` entries. A map key can be any value supported as a Java `HashMap` key.
+
+```lox
+var student = {
+  "name": "Isaac",
+  "major": "Computer Science"
+};
+
+print student["name"]; // Isaac
+student["year"] = 2;
+print student["year"]; // 2
+```
+
+An empty list is written as `[]`, and an empty map is written as `{}` when used in an expression.
+
 ## How It Works
 
 Source code passes through four main stages:
 
 1. The scanner converts characters into tokens.
-2. The parser converts the tokens into an AST.
+2. The parser converts the tokens into an AST, including collection literals and index operations.
 3. The resolver determines lexical scope and validates uses of variables, functions, and classes.
 4. The interpreter walks the AST and executes the program.
 
@@ -174,6 +215,9 @@ The AST uses the Visitor pattern so operations such as resolution and interpreta
 - Functions and classes require the exact number of arguments declared by their parameters or initializer.
 - Fields are accessed through instances, such as `object.field`.
 - A subclass is declared with `<`, such as `class Student < Person`.
+- Lists use zero-based numeric indexes. Accessing an index outside the list bounds produces a runtime error.
+- Reading a missing map key returns `nil`; assigning to a new key adds it to the map.
+- Lists and maps are mutable, so indexed assignment updates the existing collection.
 
 ## Exit Codes
 
